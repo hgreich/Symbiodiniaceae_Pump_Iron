@@ -1,0 +1,140 @@
+---
+title: "fig_6_PCA"
+author: "Hannah Reich"
+date: "July 2, 2019"
+output: html_document
+---
+
+```{r}
+# this is the code for the multivariate metal content analysis aka Principal Component Analysis (PCA) & figure
+# figure 6
+# this metal content data is all normalized to mol P
+
+# load the packages and data
+setwd("~/Desktop/PhD/EAPSI 2017/metaldatastats_FINAL/")
+
+library(readxl)
+library(ggpubr)
+library(ggfortify)
+library(ggplot2)
+library(cluster)
+library("FactoMineR") # this is my favorite PCA package! lots of options for visuals and summary stats
+library("factoextra")
+library("corrplot")
+library(dplyr)
+library(ggbiplot)
+library(cowplot)
+library(vegan)
+
+m1 <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/metal_data.xlsx", sheet = "pca_figs")
+
+m1 <- as.data.frame(m1)
+# this is the raw data that is not log transformed
+
+# reorganize the data so it only includes metal content data (aka remove columns with uptake and efficiency data)
+pca_nolog <- m1[,c(1:3,5,8,11,14,17,20,23,26)]
+
+# log transform the data
+# rationale from Quigg et al 2003 "The analysis was performed on Fe, Mn, Zn, Cu, Co and Cd concentrations, normalized to phosphorus and log transformed to homogenize the variances. Each species was represented as a point in six-dimensional space (one dimension for each element). The analysis was performed on the basis of correlations rather than co-variances, giving equal weight to each ratio as opposed to giving more weight to the elements with the larger ratios."
+
+# log transform the data
+# only the metal content data
+pca <- log(pca_nolog[,4:11])
+
+# rename the metals
+colnames(pca)[colnames(pca)=="Fe56"] <-"Fe"
+colnames(pca)[colnames(pca)=="Mn55"] <-"Mn"
+colnames(pca)[colnames(pca)=="Co59"] <-"Co"
+colnames(pca)[colnames(pca)=="Ni58"] <-"Ni"
+colnames(pca)[colnames(pca)=="Cu63"] <-"Cu"
+colnames(pca)[colnames(pca)=="Zn66"] <-"Zn"
+colnames(pca)[colnames(pca)=="Mo95"] <-"Mo"
+colnames(pca)[colnames(pca)=="V51"] <-"V"
+
+# merge the descriptive columns with the log-transformed data columns
+total <- pca_nolog[,1:3]
+all <- cbind(total,pca)
+
+# remove missing data
+pca_na <- (na.omit(all))
+
+# make species and iron factors, biplot won't work without this!
+species <- factor(pca_na[,3])
+iron <- factor(pca_na[,2])
+
+##### 
+# this part of the code uses the PCA function and stats from the FactoMineR package
+facto3 <- PCA(pca_na[,4:11], scale.unit = TRUE, ncp = 10, graph = TRUE)
+
+# correlations variables - dimensions
+facto3$var$cor
+# mean of the variables
+facto3$call$centre
+# standard error of variables
+facto3$call$ecart.type
+
+eig.val1 <- get_eigenvalue(facto3)
+eig.val1
+fviz_eig(facto3, addlabels = TRUE)
+var1 <- get_pca_ind(facto3)
+#var1
+var2 <- get_pca_var(facto3)
+# Contributions to the principal components
+head(var2$contrib, 10)
+
+# make a corrplot on contribution to PC
+corrplot(var2$contrib, is.corr=FALSE)
+
+## red line = expected average contribution... "In this case, the expected average contribution (cutoff) is calculated as follow: As mentioned above, if the contributions of the 10 variables were uniform, the expected average contribution on a given PC would be 1/10 = 10%. The expected average contribution of a variable for PC1 and PC2 is : [(10* Eig1) + (10 * Eig2)]/(Eig1 + Eig2)"
+# bar graphs of contributions for all of the dimensions... for variables
+c <- fviz_contrib(facto3, choice = "var", axes = 1, top = 10)
+save_plot("pc1_contribution_of_var.png",c, base_aspect_ratio = 1.6)
+d <- fviz_contrib(facto3, choice = "var", axes = 2, top = 10)
+save_plot("pc2_contribution_of_var.png",d, base_aspect_ratio = 1.6)
+fviz_contrib(facto3, choice = "var", axes = 3, top = 10)
+
+fviz_pca_var(facto3, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")
+             )
+
+### describe dimensions
+dim_descript <- dimdesc(facto3, axes = c(1,2,3,4,5,6,7), proba = 0.05)
+
+# dim1
+dim_descript$Dim.1
+# dim2
+dim_descript$Dim.2
+
+# make the biplot
+# this fuses the facto package and ggplot features (uses base facto biplot and overlays with geom_point so can have shape demark one factor and color another factor)
+
+# iron concentration and species were made factors (lines 62-64)... biplot won't work without this!
+# this is the color scheme
+cols <- c("S. microadriaticum" = "darkorange1", "S. necroappetens" = "goldenrod1", "B. minutum" = "darkgreen", "B. psygmophilum" = "chartreuse2", "E. voratum" = "blue2")
+
+c <- fviz_pca_biplot(facto3, 
+                     label = "var",
+                     col.var = "black", labelsize = 4,
+                     alpha.ind = "0") + # makes individs transparent so they can be overwritten by geom_point()
+              geom_point(aes(shape=iron, colour=species), size = 3) +
+              scale_color_manual(values = cols, breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum"), name = "Species") +
+              scale_shape_manual(values = c(24,22,21), breaks = c("50", "100", "250"), labels = c("250 pM Fe'", "500 pM Fe'", "1250 pM Fe'"), name = "Iron Concentration")  +
+              stat_ellipse(geom = "polygon", type = "t", alpha = 0.125, 
+                           aes(fill= species), show.legend = FALSE) + scale_fill_manual(values=cols) + # ellipses assumes multivariate distribution using default confidence level (0.95)
+              labs(title = "Principle Component Analysis (PCA) of \n Symbiodiniaceae Trace Metal Content",
+                   x = "PC1 (45.16% explained variance)",
+                   y = "PC2 (20.77% explained variance)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_text(face = "bold"),
+        legend.title.align =  0.5, legend.text.align = 0,
+        legend.title = element_text(face = "bold")) 
+c
+
+# the "final" biplot was touched up in adobe illustrator
+# made species names in italics
+# brought loadings arrows and labels to front layer (above points)
+# this is the one to touch up in illustrator
+save_plot("PCA_BIPLOT_FINAL.pdf", c, base_aspect_ratio = 1.6)
+
+```
+
