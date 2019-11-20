@@ -1,0 +1,70 @@
+---
+title: "fig_2_cell_density"
+author: "Hannah Reich"
+date: "July 1, 2019"
+output: html_document
+---
+
+```{r fig.height=10, fig.width=10}
+# this is the data for figure 2
+# this code recreates the figure and the statistics
+# it tracks avg +/- SD cell density through time for the 5 Symbio species at the 4 iron concentrations
+# this is a very helpful resource for working with legends in facet'ed data: https://cran.r-project.org/web/packages/lemon/vignettes/legends.html
+
+setwd("~/Desktop/PhD/EAPSI 2017/R/")
+
+library(ggplot2)
+library(cowplot) # this was coded back in the good 'ol days where loading cowplot would automatically set plot theme. Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme anymore. To recover the previous behavior, execute: theme_set(theme_cowplot())
+library(readxl)
+library(grid)
+library(gridExtra)
+library(lemon)
+
+# load in the data
+cd2017 <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/fig_2_stats.xlsx", sheet = "fig")
+attach(cd2017) # attach the data
+
+pd <- position_dodge(0.1) # this is for the error bars
+
+# make the species names and orders pub ready
+# reorder to match other figures
+cd2017$species <- factor(cd2017$species, levels = c("smic","necro","vor","min","psyg"))
+# rename species levels
+levels(cd2017$species) <- c("S. microadriaticum", "S. necroappetens", "E. voratum","B. minutum", "B. psygmophilum")
+
+# this version uses different shapes for each iron concentration. can easily switch to color.
+pdf("celldensity_2017_SHAPE.pdf", width = 12, height = 9, onefile = F) # use onefile=F so it doesn't print more than one pdf page because that is annoying
+fig <- ggplot(cd2017, aes(x=day, y=density, shape = factor(iron))) +
+  geom_line() +
+  scale_y_continuous(trans = "log", limits = c(-100000,10e6), breaks = c(-100000, -10000, -1000, 0, 10e3, 10e4, 10e5)) +
+  geom_errorbar(aes(ymin=density-stdev, ymax=density+stdev), width=0.75, colour="black", position=pd)+
+  geom_line(position=pd) +
+  geom_point(position=pd, size=3, fill = "white") +
+  xlim(0,48) +
+  facet_wrap(~species, ncol = 3) +
+  theme(strip.text.x = element_text(size=18, face = "bold.italic", margin = margin(.4, 0, .4, 0, "cm"))) +
+  labs(x="Day", 
+       y=expression(bold(Cell~Density~(cells~mL^-1)))) +
+  theme(axis.text = element_text(size=16)) + 
+  theme(axis.title = element_text(size=20, face = "bold")) +
+  theme(legend.title = element_text(size=18, face="bold"), legend.text = element_text(size = 16)) +
+  scale_shape_manual(values = c(23,24,22,21), name = " Bioavailable Iron \n Concentration (pM Fe')",
+                      breaks = c("0", "50", "100", "250"),
+                      labels = c ("0 pM Fe'", "250 pM Fe'", "500 pM Fe'", "1250 pM Fe'")) 
+
+reposition_legend(fig, 'center', panel = 'panel-3-2')
+dev.off()
+
+
+################################
+################################
+
+# growth curve stats
+library(PMCMR) # everything is non-parametric
+  stats <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/fig_1_stats.xlsx", sheet = "kwtest")
+shapiro.test(stats$density) # check for normality anyways
+stats$sptreat <- as.factor(stats$sptreat) # this is so the kruskal-wallis test will work. sptreat = combo of species & iron treatment
+kruskal.test(stats$density, stats$sptreat)
+posthoc.kruskal.dunn.test(stats$density,stats$sptreat,p.adjust.method = "fdr")
+```
+

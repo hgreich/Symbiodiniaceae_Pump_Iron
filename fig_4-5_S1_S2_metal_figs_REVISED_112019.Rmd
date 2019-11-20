@@ -1,0 +1,392 @@
+---
+title: "fig_4-5_S1_S2_metal_figs"
+author: "Hannah Reich"
+date: "November 20, 2019"
+output: html_document
+---
+
+```{r}
+# these are the univariate metal figures
+# figures 4, S1, S2
+# this data is all normalized to mol P
+
+# these figures were revised after receiving reviewer comments. Figure 5 was perceived as confusing for two reviewers and is now being split into different figures (one illustrating metal uptake and the other metal efficiency rather than putting both in the same figure).
+
+#### Figure 4 remains the SAME. note that after these figures were initially coded the cowplot package was altered and loading cowplot no longer adds themes. The figures that were revised during the november 2019 revision reflect this
+setwd("~/Desktop/PhD/EAPSI 2017/metaldatastats_FINAL/")
+
+library(ggplot2)
+library(cowplot) # this was coded back in the good 'ol days where loading cowplot would automatically set plot theme. Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme anymore. To recover the previous behavior, execute: theme_set(theme_cowplot()). the code for figure 4 remains the same because it did not need revisions.
+library(readxl)
+library(dplyr)
+library(reshape2)
+library(ggpubr)
+library(Hmisc)
+library(PMCMR)
+library(lemon) # for reposition_legend() function
+
+fw <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/metal_data.xlsx",
+                             sheet = "univar_figs")
+
+# this is for organizing the figs
+byspp_order <- c("smic50", "smic100", "smic250", "necro50", "necro100", "necro250", 
+           "min50", "min100", "min250", "psyg50", "psyg100", "psyg250",
+           "vor50", "vor100", "vor250")
+iron_conc <- c("250", "500", "1250", "250", "500", "1250","250", "500", "1250","250", "500", "1250","250", "500", "1250")
+
+# this is for the error bars
+pd <- position_dodge(0.1)
+
+# this is the color scheme
+cols <- c("S. microadriaticum" = "darkorange1", "S. necroappetens" = "goldenrod1", "B. minutum" = "darkgreen", "B. psygmophilum" = "chartreuse2", "E. voratum" = "blue2")
+
+# data wrangling
+# melt the data
+fwmelt <- melt(fw, id=c("treatment", "ironconc", "species"), measure.vars = c("specificgrowth", "Mn55", "Mn_uptake", "Mn_effic", "Fe56", "Fe_uptake", "Fe_effic", "Co59", "Co_uptake", "Co_effic", "Ni58", "Ni_uptake", "Ni_effic", "Cu63", "Cu_uptake", "Cu_effic", "Zn66", "Zn_uptake", "Zn_effic", "Mo95", "Mo_uptake", "Mo_effic", "V51", "V_uptake", "V_effic"))
+
+# rename the variable levels so they are paper ready :)
+levels(fwmelt$variable) <- c("Specific growth", "Manganese content", "Manganese uptake", "Manganese use efficiency", "Iron content", "Iron uptake", "Iron use efficiency", "Cobalt content", "Cobalt uptake", "Cobalt use efficiency", "Nickel content", "Nickel uptake", "Nickel use efficiency", "Copper content", "Copper uptake", "Copper use efficiency", "Zinc content", "Zinc uptake", "Zinc use efficiency", "Molybdenum content", "Molybdenum uptake", "Molybdenum use efficiency", "Vanadium content", "Vanadium uptake", "Vanadium use efficiency")
+
+# get summary stats
+fwstats <- fwmelt %>%
+  group_by(treatment, ironconc, species, variable) %>%
+  summarise(avg = mean(value,na.rm=T), sd = sd(value,na.rm=T))
+
+# make object for content variables
+content <- filter(fwstats, variable %in% c("Iron content", "Zinc content","Cobalt content", "Manganese content", "Nickel content", "Copper content", "Molybdenum content", "Vanadium content"))
+# reorder factors in ideal order
+content$variable <- factor(content$variable, levels = c("Iron content", "Zinc content","Cobalt content", "Manganese content", "Nickel content", "Copper content", "Molybdenum content", "Vanadium content"))
+
+# make object for uptake variables
+uptake <- filter(fwstats, variable %in% c("Manganese uptake", "Iron uptake", "Cobalt uptake", "Nickel uptake", "Copper uptake", "Zinc uptake", "Molybdenum uptake", "Vanadium uptake"))
+# reorder factors
+uptake$variable <- factor(uptake$variable, levels = c("Iron uptake", "Zinc uptake", "Cobalt uptake", "Manganese uptake", "Nickel uptake", "Copper uptake", "Molybdenum uptake", "Vanadium uptake"))
+
+# make object for efficiency variables
+effic <- filter(fwstats, variable %in% c("Manganese use efficiency", "Iron use efficiency", "Cobalt use efficiency", "Nickel use efficiency", "Copper use efficiency", "Zinc use efficiency", "Molybdenum use efficiency", "Vanadium use efficiency"))
+# reorder factors
+effic$variable <- factor(effic$variable, levels = c("Iron use efficiency", "Zinc use efficiency", "Cobalt use efficiency", "Manganese use efficiency", "Nickel use efficiency", "Copper use efficiency",  "Molybdenum use efficiency", "Vanadium use efficiency"))
+
+###########################################################
+####### figure 4, iron content, uptake rate, use efficiency
+###########################################################
+
+# make objects for fe content, fe uptake & fe effic for the new averages
+
+fecontent <- filter(fwstats, variable %in% "Iron content")
+feuptake <- filter(fwstats, variable %in% "Iron uptake")
+feeffic <- filter(fwstats, variable %in% "Iron use efficiency")
+
+# iron content
+Fe_spp <- ggplot(fecontent, aes(x=treatment, y=avg, fill=species), order = byspp_order) + geom_bar(stat = "identity") + scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  guides(colour = guide_legend(override.aes = list(size=3,linetype=0))) +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +
+  labs(y=expression(bold(mmol~metal~mol~P^-1)), title = "Iron Content", x = "  ") + 
+  theme(axis.text = element_text(size=14)) + 
+  theme(axis.title = element_text(size=14, face = "bold")) +
+  theme(legend.text = element_text(size=14,face="italic")) + 
+  theme(legend.title = element_text(size=14, face="bold")) +
+  theme(legend.title.align=0.5) +
+  theme(legend.position = "right")+
+  theme(plot.title = element_text(size = 18, face = "bold")) +
+  scale_fill_manual(values=cols, name = "Species",breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum")) + 
+  scale_y_continuous(breaks=c(0,10,20)) +
+  theme(legend.background = element_rect(fill="lightgrey",
+                                  size=1, linetype="solid", 
+                                  colour ="black"))
+Fe_spp
+#save_plot("Fe_spp_pmmol.png", Fe_spp, base_aspect_ratio = 1.3)
+
+# uptake
+
+Fe_uptake_pmmol <- ggplot(feuptake, aes(x=treatment, y=avg, fill=species)) + geom_bar(stat = "identity") + scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +
+  labs(y=expression(bold(mmol~metal~mol~P^-1~day^-1)), title="Iron Uptake", x = "Bioavailable Iron Concentration (pM Fe')") +
+  theme(axis.text = element_text(size=14)) +
+  theme(axis.title = element_text(size=14, face = "bold")) +
+  theme(legend.text = element_text(size=14,face="italic")) + 
+  theme(legend.title = element_text(size=14, face="bold")) +
+  theme(legend.title.align=0.5) +
+  theme(legend.position = c(0.3,0.8))+
+    theme(plot.title = element_text(size = 18, face = "bold")) +
+  scale_fill_manual(values = cols, breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum")) +
+  scale_y_continuous(breaks=c(0.0,2.5,5,7.5,10))
+Fe_uptake_pmmol
+#save_plot("Fe_uptake_pmmol.png", Fe_uptake_pmmol,base_aspect_ratio = 1.3)
+
+# efficiency
+Fe_effic_pmmol <- ggplot(feeffic, aes(x=treatment, y=avg, fill=species)) + geom_bar(stat = "identity") + scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  theme(axis.text.x = element_text(angle=70, vjust=0.5)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +
+  labs(x="  ",y=expression(bold(mol~P~mmol~metal^-1~day^-1)), title="Iron Use Efficiency") + 
+  theme(axis.text = element_text(size=14)) + 
+  theme(axis.title = element_text(size=14, face = "bold")) +
+  theme(legend.text = element_text(size=14,face="italic")) + 
+  theme(legend.title = element_text(size=14, face="bold")) +
+  theme(legend.title.align=0.5) +
+  theme(legend.position = c(0.3,0.8))+
+  theme(plot.title = element_text(size = 18, face = "bold")) +
+  scale_fill_manual(values = cols,breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum")) +
+  scale_y_continuous(breaks=c(0.0,0.1,0.2,0.3,0.4, 0.5, 0.6))
+Fe_effic_pmmol
+#save_plot("Fe_effic_pmmol.png", Fe_effic_pmmol,base_aspect_ratio = 1.3)
+
+# plot the figures together on a grid
+legend <- get_legend(Fe_spp)
+ironfigs <- plot_grid(Fe_spp + theme(legend.position="none"), Fe_uptake_pmmol + theme(legend.position="none"), Fe_effic_pmmol+ theme(legend.position = "none"), legend, ncol=4, nrow=1, labels = c('a)','b)','c)', NULL), align = "v", label_size = 22)
+save_plot("ironfigs.pdf", ironfigs,
+          ncol=4, nrow=1, base_aspect_ratio = 1.3)
+
+######################################################################
+############# figure 5, metal content (non-iron) for the 5 species
+######################################################################
+
+# re-wrangle the melted data, take iron out so it does not take up too much space
+# make object for content variables
+content2 <- filter(fwstats, variable %in% c("Zinc content","Cobalt content", "Manganese content", "Nickel content", "Copper content", "Molybdenum content", "Vanadium content"))
+# reorder factors in ideal order
+content2$variable <- factor(content2$variable, levels = c("Zinc content","Cobalt content", "Manganese content", "Nickel content", "Copper content", "Molybdenum content", "Vanadium content"))
+# rename levels to take content out to save space
+levels(content2$variable) <- c("Zinc","Cobalt", "Manganese", "Nickel", "Copper", "Molybdenum", "Vanadium")
+
+# make content figure
+attach(content2)
+contentfigv2 <- ggplot(content2, aes(x=treatment, y=avg, fill=species)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~variable, scales = "free_y", nrow = 2, ncol=4) +
+  theme(strip.text.x = element_text(size=8, margin = margin(.08, 0, .08, 0, "cm"))) +
+  scale_fill_manual(values=cols, name = "Species",breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum"), labels = c("Symbiodinium microadriaticum", "Symbiodinium necroappetens", "Breviolum minutum", "Breviolum psygmophilum", "Effrenium voratum")) +
+  theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +   scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  theme(legend.key.size = unit(0.25, "cm")) +
+  labs(x="Bioavailable Iron Concentration (pM Fe')", 
+       y=expression(bold(Metal~Content~(mmol~metal~mol~P^-1))), 
+title = "Metal content") + 
+  theme(axis.text.y = element_text(size=6), axis.text.x = element_text(size=6)) + 
+  theme(axis.title = element_text(size=10, face = "bold")) +
+  theme(legend.text = element_text(size=6,face="italic"), legend.title = element_text(face = "bold",size = 8 ), plot.title = element_text(size=10, face = "bold"))
+v3 <- reposition_legend(contentfigv2, 'center', panel = 'panel-4-2')
+save_plot("contentfigv2.pdf", v3, base_aspect_ratio = 1.9)
+
+######################################################################
+############# figure S1, metal uptake (non-iron) for the 5 species
+######################################################################
+
+# re-wrangle the melted data, take iron out so it does not take up too much space
+# make object for uptake variables
+uptake2 <- filter(fwstats, variable %in% c("Zinc uptake","Cobalt uptake", "Manganese uptake", "Nickel uptake", "Copper uptake", "Molybdenum uptake", "Vanadium uptake"))
+# reorder factors in ideal order
+uptake2$variable <- factor(uptake2$variable, levels = c("Zinc uptake","Cobalt uptake", "Manganese uptake", "Nickel uptake", "Copper uptake", "Molybdenum uptake", "Vanadium uptake"))
+# rename levels to take uptake out to save space
+levels(uptake2$variable) <- c("Zinc","Cobalt", "Manganese", "Nickel", "Copper", "Molybdenum", "Vanadium")
+
+# make uptake figure
+attach(uptake2)
+uptakefigv2 <- ggplot(uptake2, aes(x=treatment, y=avg, fill=species)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~variable, scales = "free_y", nrow = 2, ncol=4) +
+  theme(strip.text.x = element_text(size=8, margin = margin(.08, 0, .08, 0, "cm")),
+        strip.background = element_rect(colour="#CCCCFF", fill="#CCCCFF")) +
+  scale_fill_manual(values=cols, name = "Species",breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum"), labels = c("Symbiodinium microadriaticum", "Symbiodinium necroappetens", "Breviolum minutum", "Breviolum psygmophilum", "Effrenium voratum")) +
+  theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+  theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +   scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  theme(legend.key.size = unit(0.25, "cm")) +
+  labs(x="Bioavailable Iron Concentration (pM Fe')", 
+       y=expression(bold(Metal~Uptake~(mmol~metal~mol~P^-1~day^-1))), 
+title = "Metal uptake") + 
+  theme(axis.text.y = element_text(size=6), axis.text.x = element_text(size=5)) + 
+  theme(axis.title = element_text(size=10, face = "bold")) +
+  theme(legend.text = element_text(size=6,face="italic"), legend.title = element_text(face = "bold",size = 8 ), plot.title = element_text(size=10, face = "bold")) 
+v3 <- reposition_legend(uptakefigv2, 'center', panel = 'panel-4-2')
+save_plot("uptakefigv2.pdf", v3, base_aspect_ratio = 1.9)
+
+######################################################################
+############# figure S2, metal efficiency (non-iron) for the 5 species
+######################################################################
+
+# re-wrangle the melted data, take iron out so it does not take up too much space
+# make object for efficiency variables
+efficiency2 <- filter(fwstats, variable %in% c("Zinc use efficiency","Cobalt use efficiency", "Manganese use efficiency", "Nickel use efficiency", "Copper use efficiency", "Molybdenum use efficiency", "Vanadium use efficiency"))
+# reorder factors in ideal order
+efficiency2$variable <- factor(efficiency2$variable, levels = c("Zinc use efficiency","Cobalt use efficiency", "Manganese use efficiency", "Nickel use efficiency", "Copper use efficiency", "Molybdenum use efficiency", "Vanadium use efficiency"))
+# rename levels to take efficiency out to save space
+levels(efficiency2$variable) <- c("Zinc","Cobalt", "Manganese", "Nickel", "Copper", "Molybdenum", "Vanadium")
+
+# make efficiency figure
+attach(efficiency2)
+efficiencyfigv2 <- ggplot(efficiency2, aes(x=treatment, y=avg, fill=species)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~variable, scales = "free_y", nrow = 2, ncol=4) +
+  theme(strip.text.x = element_text(size=8, margin = margin(.08, 0, .08, 0, "cm")),
+        strip.background = element_rect(colour="#CCCCFF", fill="#CCCCFF")) +
+  scale_fill_manual(values=cols, name = "Species",breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum"), labels = c("Symbiodinium microadriaticum", "Symbiodinium necroappetens", "Breviolum minutum", "Breviolum psygmophilum", "Effrenium voratum")) +
+  theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+  theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1)) +
+  geom_errorbar(aes(ymin=avg-sd, ymax=avg+sd), width=0.75, colour="black", position=pd) +   scale_x_discrete(limits = byspp_order, labels=iron_conc) +
+  theme(legend.key.size = unit(0.25, "cm")) +
+  labs(x="Bioavailable Iron Concentration (pM Fe')", 
+       y=expression(bold(Metal~Use~Efficiency~(mol~P~mmol~metal^-1~day^-1))), 
+title = "Metal Use Efficiency") + 
+  theme(axis.text.y = element_text(size=6), axis.text.x = element_text(size=5)) + 
+  theme(axis.title = element_text(size=10, face = "bold")) +
+  theme(legend.text = element_text(size=6,face="italic"), legend.title = element_text(face = "bold",size = 8 ), plot.title = element_text(size=10, face = "bold")) 
+v3 <- reposition_legend(efficiencyfigv2, 'center', panel = 'panel-4-2')
+save_plot("efficiencyfigv2.pdf", v3, base_aspect_ratio = 1.9)
+
+#########################################################
+######## all of the metal (uni-variate stats)
+#########################################################
+
+# re-attaches the data for the stats
+fw <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/metal_data.xlsx",
+                             sheet = "univar_figs")
+# rename
+mds <- fw
+attach(mds)
+# make treatment a factor for the analysis
+treat <- as.factor(treatment)
+# do all of the stats
+
+##### IRON
+
+#### quota stats
+shapiro.test(Fe56)
+kruskal.test(Fe56~treat)
+posthoc.kruskal.dunn.test(Fe56,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Fe_uptake)
+kruskal.test(Fe_uptake~treat)
+posthoc.kruskal.dunn.test(Fe_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Fe_effic)
+kruskal.test(Fe_effic~treat)
+posthoc.kruskal.dunn.test(Fe_effic,treat,p.adjust.method = "fdr")
+
+##### MANGANESE
+
+#### quota stats
+shapiro.test(Mn55)
+kruskal.test(Mn55~treat)
+posthoc.kruskal.dunn.test(Mn55,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Mn_uptake)
+kruskal.test(Mn_uptake~treat)
+posthoc.kruskal.dunn.test(Mn_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Mn_effic)
+kruskal.test(Mn_effic~treat)
+posthoc.kruskal.dunn.test(Mn_effic,treat,p.adjust.method = "fdr")
+
+##### COBALT
+
+#### quota stats
+shapiro.test(Co59)
+kruskal.test(Co59~treat)
+posthoc.kruskal.dunn.test(Co59,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Co_uptake)
+kruskal.test(Co_uptake~treat)
+posthoc.kruskal.dunn.test(Co_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Co_effic)
+kruskal.test(Co_effic~treat)
+posthoc.kruskal.dunn.test(Co_effic,treat,p.adjust.method = "fdr")
+
+##### NICKEL
+
+#### quota stats
+shapiro.test(Ni58)
+kruskal.test(Ni58~treat)
+posthoc.kruskal.dunn.test(Ni58,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Ni_uptake)
+kruskal.test(Ni_uptake~treat)
+posthoc.kruskal.dunn.test(Ni_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Ni_effic)
+kruskal.test(Ni_effic~treat)
+posthoc.kruskal.dunn.test(Ni_effic,treat,p.adjust.method = "fdr")
+
+##### COPPER
+
+#### quota stats
+shapiro.test(Cu63)
+kruskal.test(Cu63~treat)
+posthoc.kruskal.dunn.test(Cu63,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Cu_uptake)
+kruskal.test(Cu_uptake~treat)
+posthoc.kruskal.dunn.test(Cu_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Cu_effic)
+kruskal.test(Cu_effic~treat)
+posthoc.kruskal.dunn.test(Cu_effic,treat,p.adjust.method = "fdr")
+
+##### ZINC
+
+#### quota stats
+shapiro.test(Zn66)
+kruskal.test(Zn66~treat)
+posthoc.kruskal.dunn.test(Zn66,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Zn_uptake)
+kruskal.test(Zn_uptake~treat)
+posthoc.kruskal.dunn.test(Zn_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Zn_effic)
+kruskal.test(Zn_effic~treat)
+posthoc.kruskal.dunn.test(Zn_effic,treat,p.adjust.method = "fdr")
+
+##### MOLYBDENUM 
+
+#### quota stats
+shapiro.test(Mo95)
+kruskal.test(Mo95~treat)
+posthoc.kruskal.dunn.test(Mo95,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(Mo_uptake)
+kruskal.test(Mo_uptake~treat)
+posthoc.kruskal.dunn.test(Mo_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(Mo_effic)
+kruskal.test(Mo_effic~treat)
+posthoc.kruskal.dunn.test(Mo_effic,treat,p.adjust.method = "fdr")
+
+##### VANADIUM 
+
+#### quota stats
+shapiro.test(V51)
+kruskal.test(V51~treat)
+posthoc.kruskal.dunn.test(V51,treat,p.adjust.method = "fdr")
+
+#### uptake stats
+shapiro.test(V_uptake)
+kruskal.test(V_uptake~treat)
+posthoc.kruskal.dunn.test(V_uptake,treat,p.adjust.method = "fdr")
+
+#### efficiency stats
+shapiro.test(V_effic)
+kruskal.test(V_effic~treat)
+posthoc.kruskal.dunn.test(V_effic,treat,p.adjust.method = "fdr")
+
+```
+

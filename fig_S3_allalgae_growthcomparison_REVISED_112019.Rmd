@@ -1,0 +1,59 @@
+---
+title: "fig_S3_allalgae_growthcomparison"
+author: "Hannah Reich"
+date: "July 2, 2019"
+output: html_document
+---
+
+```{r}
+
+# Figure 7 compares specific growth of various phytoplankton at different Fe'
+# comparing growth at Fe' (iron prime) rather than total dissolved Fe makes studies comparable
+# This also incorporates data from Rodriguez et al 2016 and Sunda & Huntsman 1995
+
+# set the working directory
+setwd("~/Desktop/PhD/EAPSI 2017/metaldatastats_FINAL/")
+
+# load the packages
+library(Hmisc)
+library(ggplot2)
+library(cowplot) # this was coded back in the good 'ol days where loading cowplot would automatically set plot theme. Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme anymore. To recover the previous behavior, execute: theme_set(theme_cowplot())
+library(readxl)
+library(dplyr)
+library(reshape2)
+library(ggpubr)
+library(tidyr) # this is for playing with the drop_na() funciton
+
+# load the data
+dat <- read_excel("~/Desktop/PhD/chapters/chapter 1 - metal quotas/submission_data_code/fig_7_allalgae_growthcomparison_DATA.xlsx", sheet = "data")
+dat <- as.data.frame(dat)
+
+# use dplyr select function to make a dataframe with only necessary stuff
+filt <- dat %>% select(treatment, Fe_prime_nM, algal_lin, species, SPGROWTH)
+x <- as.data.frame(filt)
+
+# this is the color scheme. color designates algal lineage
+cols <- c("Symbiodiniaceae" = "goldenrod1", "coastal dino" = "darkorange1", "oceanic cocco" = "darkgreen", "coastal diatom" = "blue2", "oceanic diatom" = "chartreuse2")
+  
+# make the figure
+fig <- ggplot(x, aes(x = x$Fe_prime_nM, y = x$SPGROWTH, color = x$algal_lin))+
+  geom_point(shape = 1, size = 2) + 
+  scale_color_manual(values = cols, name = "Micro-Algal lineage", breaks = c("Symbiodiniaceae", "coastal dino", "coastal diatom", "oceanic diatom", "oceanic cocco"),  labels =c("Symbiodiniaceae", "Coastal Dinoflagellates", "Coastal Diatoms", "Oceanic Diatoms", "Oceanic Coccolithophores")) +
+  labs(x= "Bioavailable Iron Concentration (pM Fe')",
+       y=expression(bold(Specific~Growth~(μ~day^-1)))) +
+  theme(legend.position = c(0.65,0.75))+
+  theme(legend.background = element_rect(fill = "#E5E5E5", size=1, linetype = "solid", colour = "black")) + 
+  theme(legend.title.align=0.5) +
+  theme(axis.text = element_text(size=10)) + 
+  theme(axis.title = element_text(size=12, face = "bold")) +
+  theme(legend.text = element_text(size=8)) + 
+  geom_rug(alpha = 0.2, sides = "l") + 
+#  geom_line(stat = "smooth", method = lm, size = .5, alpha = 0.6) +
+ # during review, advised not to use line due to poor fit.
+   theme(legend.title = element_text(size=10, face="bold"))   +
+  xlim(0,1.5)
+fig
+
+save_plot("ironprime_growth_allalgae.pdf", fig, base_aspect_ratio = 1.6)
+```
+
