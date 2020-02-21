@@ -4,10 +4,11 @@
 
 ### Below, please a brief overview of each file and the abstract. Feel free to reach out w/ questions anytime via email: hgreich16 [at] gmail [dot] com
 
+## File overview
+** fig_2_stats.xlsx ** 
 
-
-
-**Abstract:** Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
+## Abstract
+Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
 unclear how important iron is to the functional ecology of symbiotic dinoflagellates in
 the family Symbiodiniaceae, and whether limitations in iron ultimately affect the health
 and productivity of coral hosts, especially during of episodes of ocean warming. Five
