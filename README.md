@@ -19,6 +19,13 @@ iron concentration abbreviations and species abbrevs
 
 **fig_3_specific_growth.Rmd** corresponding Rmarkdown file for specific growth figure (Fig 3)
 
+**metal_data.xlsx** Results from HR-ICPMS elemental analysis of Symbiobiodiniaceae species exposed to different iron concentrations.
+
+**fig_4-5_S1_S2_metal_figs_REVISED_112019.Rmd** Metal content, uptake, & efficiency figures (4, 5, S1, S2) and bivariate statsitics. Calls upon metal_data excel file. 
+
+**fig_6_pca.Rmd** Multivariate analysis of Symbiodiniaceae trace metal content. Calls upon metal_data excel file. This PCA fuses the FactoMineR package and ggplot features (uses base facto biplot and overlays with geom_point so can have shape demark one factor and color another factor, see lines 115-130).
+ 
+
 ## Abstract
 Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
 unclear how important iron is to the functional ecology of symbiotic dinoflagellates in
@@ -40,3 +47,7 @@ assimilation. Furthermore, these species-specific responses to iron limitation p
 a basis for investigations on how iron availability effects cellular processes among
 species and genera of Symbiodiniaceae, and ultimately how metal shortages of
 modulates the response of coral-algal mutualisms to physiological stressors.
+
+### Feel free share this paper/github on twitter (@HannahGReich) if you agree that Symbiodiniaceae trace metal needs are pretty neat :-)
+
+
