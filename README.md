@@ -4,8 +4,16 @@
 
 ### Below, please a brief overview of each file and the abstract. Feel free to reach out w/ questions anytime via email: hgreich16 [at] gmail [dot] com
 
+## General remarks
+Many of these figures were made when loading cowplot 
+iron concentration abbreviations and species abbrevs
+
 ## File overview
-** fig_2_stats.xlsx ** 
+**raw_cell_count_tracker** Excel file with raw cell count data (batch sheet). Cell densities were calculated with a beckman coulter counter for 5 Symbiodiniaceae species exposed to 4 iron concentrations. The innoculation density sheet includes cell density info for stock cultures/ 
+**fig_2_stats.xlsx** Excel file of cell density and stdev of cultures exposed to four iron concentrations (averages and stdev are from raw cell count tracker file).
+**fig_2_cell_density_.Rmd** Rmarkdown file of cell density figure (fig 2) and corresponding statistics. Calls upon the fig_2_stats excel file. 
+**fig_3_specific_growth.xlsx** Excel file with sheets including average specific growth (used for R), and the (raw) calculation for each species. 
+**fig_3_specific_growth.Rmd** corresponding Rmarkdown file for specific growth figure (Fig 3)
 
 ## Abstract
 Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
