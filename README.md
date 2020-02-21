@@ -1,12 +1,11 @@
 # Symbiodiniaeae_Pump_Iron
 
-Welcome to the github page for the paper "Endosymbiotic dinoflagellates pump iron: Differences in iron and other trace metal
-needs among the Symbiodiniaceae" - Hannah Reich, Irene Rodriguez, Todd LaJeunesse, Tung-Yuan Ho. (Coral Reefs 2020). Below, please a brief overview of each file and the abstract. Feel free to reach out anytime via email: hgreich16 [at] gmail [dot] com
+## Welcome to the github page for the paper "Endosymbiotic dinoflagellates pump iron: Differences in iron and other trace metal needs among the Symbiodiniaceae" - Hannah Reich, Irene Rodriguez, Todd LaJeunesse, Tung-Yuan Ho. (Coral Reefs 2020). Below, please a brief overview of each file and the abstract. Feel free to reach out anytime via email: hgreich16 [at] gmail [dot] com
 
 
 
 
-Abstract: Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
+**Abstract:** Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
 unclear how important iron is to the functional ecology of symbiotic dinoflagellates in
 the family Symbiodiniaceae, and whether limitations in iron ultimately affect the health
 and productivity of coral hosts, especially during of episodes of ocean warming. Five
