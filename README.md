@@ -4,9 +4,12 @@
 
 ### Below, please a brief overview of each file and the abstract. Feel free to reach out w/ questions anytime via email: hgreich16 [at] gmail [dot] com
 
-## General remarks
-Many of these figures were made when loading cowplot 
-iron concentration abbreviations and species abbrevs
+## General remarks 
+Abbreviations: min/bmin = Breviolum minutum; psyg/psygmo/bpsyg = Breviolum psygmophilum; vor/evor = Effrenium votatum; smic = Symbiodinium microagriaticum; necro/snec = Symbiodinium necroappetens
+
+The data files use the total desolved iron concentrations throughout. In the paper/figures, the treatments are referred to by their bioavailable iron concentrations (pM Fe') which makes the study comparable to others. Following the addition of EDTA, the "estimated inorganic concentrations of 0, 250, 500, and 1250 pM Fe' represented the bioavailable fractions and correspond to the total dissolved iron concentrations 0, 50, 100, and 250 nM Fe, respectively (Rodriguez et al. 2016; Rodriguez and Ho 2017,2018). Hereafter, the iron treatments will be referred to as starvation (0 pM Fe'), low iron (250 pM Fe'), intermediate iron (500 pM Fe') and replete iron (1,250 pM Fe')."
+
+Many of these figures were coded back in the good 'ol days where loading cowplot would automatically set plot theme. Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme anymore. To recover the previous behavior, execute: theme_set(theme_cowplot())
 
 ## File overview
 **raw_cell_count_tracker** Excel file with raw cell count data (batch sheet). Cell densities were calculated with a beckman coulter counter for 5 Symbiodiniaceae species exposed to 4 iron concentrations. The innoculation density sheet includes cell density info for stock cultures
@@ -23,8 +26,13 @@ iron concentration abbreviations and species abbrevs
 
 **fig_4-5_S1_S2_metal_figs_REVISED_112019.Rmd** Metal content, uptake, & efficiency figures (4, 5, S1, S2) and bivariate statsitics. Calls upon metal_data excel file. 
 
-**fig_6_pca.Rmd** Multivariate analysis of Symbiodiniaceae trace metal content. Calls upon metal_data excel file. This PCA fuses the FactoMineR package and ggplot features (uses base facto biplot and overlays with geom_point so can have shape demark one factor and color another factor, see lines 115-130).
+**fig_6_pca.Rmd** Multivariate analysis of Symbiodiniaceae trace metal content (Fig 6). Calls upon metal_data excel file. This PCA uses features from the FactoMineR and ggplot2 packages (so shape can demark one factor and color another factor, see lines 115-130).
+
+**fig_s3_allalgae_growthcomparison_DATA.xlsx** Excel file for Fig S3. Compares specific growth rate of Symbiodiniaceae at different bioavailable iron concentrations to other phytoplankton. These studies are comparable because they calculate/present bioavailable iron concentrations (in addition to total dissolved iron concentrations). Data are incorporated from Sunda & Huntsman 1995; Rodriguez et al 2016; Rodriguez & Ho 2018. Links here: https://www.sciencedirect.com/science/article/pii/030442039500035P; https://www.frontiersin.org/articles/10.3389/fmicb.2016.00082/full; https://www.frontiersin.org/articles/10.3389/fmicb.2018.00142/full
+
+**fig_s3_allalgae_growthcomparison.Rmd** Rmarkdown file for figure S3. Visualizes microalgae specific growth by bioavialable iron concentration for different lineages. Calls upon the growth comparison excel file.
  
+**all_posthoc_stats_output.csv** Bivariate kruskal-wallis output for metal content, uptake & efficiency. Pairwise comparisons between each treatment. Please see description of abbreviations in the general remarks (above) for proper interpretation of abbreviations in "comparisons" column.
 
 ## Abstract
 Iron (Fe) is essential to the physiology and growth of marine phytoplankton. It remains
