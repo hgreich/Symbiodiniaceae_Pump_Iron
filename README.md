@@ -5,9 +5,9 @@
 ### Below, please a brief overview of each file and the abstract. Feel free to reach out w/ questions anytime via email: hgreich16 [at] gmail [dot] com
 
 ## General remarks 
-Abbreviations: min/bmin = Breviolum minutum; psyg/psygmo/bpsyg = Breviolum psygmophilum; vor/evor = Effrenium votatum; smic = Symbiodinium microagriaticum; necro/snec = Symbiodinium necroappetens
+**Species Abbreviations**: min/bmin = Breviolum minutum; psyg/psygmo/bpsyg = Breviolum psygmophilum; vor/evor = Effrenium votatum; smic = Symbiodinium microagriaticum; necro/snec = Symbiodinium necroappetens
 
-The data files use the total desolved iron concentrations throughout. In the paper/figures, the treatments are referred to by their bioavailable iron concentrations (pM Fe') which makes the study comparable to others. Following the addition of EDTA, the "estimated inorganic concentrations of 0, 250, 500, and 1250 pM Fe' represented the bioavailable fractions and correspond to the total dissolved iron concentrations 0, 50, 100, and 250 nM Fe, respectively (Rodriguez et al. 2016; Rodriguez and Ho 2017,2018). Hereafter, the iron treatments will be referred to as starvation (0 pM Fe'), low iron (250 pM Fe'), intermediate iron (500 pM Fe') and replete iron (1,250 pM Fe')."
+**Iron concentration abbreviations** The data files use the total desolved iron concentrations throughout. In the paper/figures, the treatments are referred to by their bioavailable iron concentrations (pM Fe') which makes the study comparable to others. Following the addition of EDTA, the "estimated inorganic concentrations of 0, 250, 500, and 1250 pM Fe' represented the bioavailable fractions and correspond to the total dissolved iron concentrations 0, 50, 100, and 250 nM Fe, respectively (Rodriguez et al. 2016; Rodriguez and Ho 2017,2018). Hereafter, the iron treatments will be referred to as starvation (0 pM Fe'), low iron (250 pM Fe'), intermediate iron (500 pM Fe') and replete iron (1,250 pM Fe')."
 
 Many of these figures were coded back in the good 'ol days where loading cowplot would automatically set plot theme. Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme anymore. To recover the previous behavior, execute: theme_set(theme_cowplot())
 
