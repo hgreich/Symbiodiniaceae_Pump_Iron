@@ -2,6 +2,7 @@
 
 ## Welcome to the github page for the paper "Endosymbiotic dinoflagellates pump iron: Differences in iron and other trace metal needs among the Symbiodiniaceae" - Hannah Reich, Irene Rodriguez, Todd LaJeunesse, Tung-Yuan Ho. (2020; Coral Reefs). 
 Read the article online here: https://link.springer.com/article/10.1007%2Fs00338-020-01911-z
+
 DOI: https://doi.org/10.1007/s00338-020-01911-z
 
 ### Below, please a brief overview of each file and the abstract. Feel free to reach out w/ questions anytime via email: hgreich16 [at] gmail [dot] com
