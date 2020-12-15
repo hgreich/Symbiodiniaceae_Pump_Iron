@@ -116,6 +116,8 @@ c <- fviz_pca_biplot(facto3,
                      label = "var",
                      col.var = "black", labelsize = 4,
                      alpha.ind = "0") + # makes individs transparent so they can be overwritten by geom_point()
+                     # in later versions of Facto packages, setting alpha.ind = "0" results in the following error message: "Error in alpha * 255 : non-numeric argument to binary operator"
+                     # to avoid said error message and wanting to throw your computer out the window use alpha.ind=0 instead (no quotes around the 0)
               geom_point(aes(shape=iron, colour=species), size = 3) +
               scale_color_manual(values = cols, breaks=c("S. microadriaticum", "S. necroappetens", "B. minutum", "B. psygmophilum", "E. voratum"), name = "Species") +
               scale_shape_manual(values = c(24,22,21), breaks = c("50", "100", "250"), labels = c("250 pM Fe'", "500 pM Fe'", "1250 pM Fe'"), name = "Iron Concentration")  +
